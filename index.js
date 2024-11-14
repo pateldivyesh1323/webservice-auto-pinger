@@ -16,7 +16,7 @@ app.use(express.json());
 
 // Connect to MongoDB
 let db;
-MongoClient.connect(mongoUri, { useUnifiedTopology: true })
+MongoClient.connect(mongoUri)
     .then((client) => {
         console.log("Connected to MongoDB");
     })

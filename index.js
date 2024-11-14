@@ -19,6 +19,7 @@ let db;
 MongoClient.connect(mongoUri)
     .then((client) => {
         console.log("Connected to MongoDB");
+        db = client.db("website-auto-pinger");
     })
     .catch((err) => {
         console.error("Failed to connect to MongoDB:", err);

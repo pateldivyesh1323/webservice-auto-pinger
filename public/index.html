@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Auto Pinger</title>
+    <style>
+        :root {
+            --bg: #0f1117;
+            --card: #181b24;
+            --card-2: #1f2330;
+            --border: #2a2f3d;
+            --text: #e6e8ee;
+            --muted: #8b90a0;
+            --accent: #5b8cff;
+            --accent-hover: #4178f0;
+            --danger: #ff5b6e;
+            --danger-hover: #e8475a;
+            --ok: #34d399;
+            --radius: 14px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+            background: radial-gradient(1200px 600px at 50% -10%, #1a1f2e 0%, var(--bg) 55%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 32px 16px;
+        }
+
+        .hidden { display: none !important; }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+        .logo .dot {
+            width: 12px; height: 12px; border-radius: 50%;
+            background: var(--ok);
+            box-shadow: 0 0 12px var(--ok);
+            animation: pulse 1.8s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: .5; transform: scale(.8); }
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            width: 100%;
+            box-shadow: 0 20px 50px rgba(0,0,0,.35);
+        }
+
+        #login-card { max-width: 380px; }
+        #app { max-width: 720px; width: 100%; }
+
+        h2 { font-size: 18px; margin-bottom: 4px; }
+        .sub { color: var(--muted); font-size: 13px; margin-bottom: 18px; }
+
+        label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+
+        input[type="password"], input[type="text"], input[type="url"] {
+            width: 100%;
+            background: var(--card-2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 12px 14px;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color .15s;
+        }
+        input:focus { border-color: var(--accent); }
+
+        button {
+            cursor: pointer;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 12px 16px;
+            transition: background .15s, opacity .15s;
+        }
+        button:disabled { opacity: .6; cursor: not-allowed; }
+
+        .btn-primary { background: var(--accent); color: white; width: 100%; margin-top: 14px; }
+        .btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
+
+        .btn-ghost {
+            background: var(--card-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        .btn-ghost:hover:not(:disabled) { background: #262b3a; }
+
+        .btn-danger { background: transparent; color: var(--danger); border: 1px solid transparent; padding: 8px 10px; }
+        .btn-danger:hover:not(:disabled) { background: rgba(255,91,110,.12); }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+        .topbar h2 { font-size: 20px; }
+
+        .add-row { display: flex; gap: 10px; margin-bottom: 8px; }
+        .add-row input { flex: 1; }
+        .add-row button { white-space: nowrap; }
+
+        .toolbar { display: flex; gap: 10px; margin: 16px 0; }
+
+        ul { list-style: none; }
+        .url-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--card-2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+        }
+        .url-item .status {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: var(--muted);
+            flex-shrink: 0;
+        }
+        .url-item .status.ok { background: var(--ok); box-shadow: 0 0 8px var(--ok); }
+        .url-item .status.fail { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+        .url-item .url {
+            flex: 1;
+            font-size: 14px;
+            word-break: break-all;
+        }
+        .url-item .meta { font-size: 12px; color: var(--muted); }
+        .url-item.disabled { opacity: .55; }
+        .url-item.disabled .url { text-decoration: line-through; }
+        .btn-toggle { padding: 8px 12px; }
+
+        .empty { color: var(--muted); text-align: center; padding: 28px 0; font-size: 14px; }
+
+        .msg { font-size: 13px; margin-top: 12px; min-height: 18px; }
+        .msg.error { color: var(--danger); }
+        .msg.success { color: var(--ok); }
+
+        .footer { color: var(--muted); font-size: 12px; margin-top: 22px; }
+        a { color: var(--accent); }
+    </style>
+</head>
+<body>
+    <div class="logo"><span class="dot"></span> Auto Pinger</div>
+
+    <div id="login-card" class="card">
+        <h2>Sign in</h2>
+        <p class="sub">Enter your password to manage pinged URLs.</p>
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" />
+        <button class="btn-primary" id="login-btn">Sign in</button>
+        <div class="msg error" id="login-msg"></div>
+    </div>
+
+    <div id="app" class="card hidden">
+        <div class="topbar">
+            <h2>Pinged URLs</h2>
+            <button class="btn-ghost" id="logout-btn">Log out</button>
+        </div>
+
+        <div class="add-row">
+            <input type="url" id="new-url" placeholder="https://your-backend.onrender.com" />
+            <button class="btn-primary" id="add-btn" style="width:auto;margin:0;">Add URL</button>
+        </div>
+        <div class="msg" id="app-msg"></div>
+
+        <div class="toolbar">
+            <button class="btn-ghost" id="refresh-btn">Refresh</button>
+            <button class="btn-ghost" id="ping-btn">Ping all now</button>
+        </div>
+
+        <ul id="url-list"></ul>
+        <div class="empty hidden" id="empty-state">No URLs yet. Add one above to keep it awake.</div>
+
+        <div class="footer">Cron pings every minute automatically.</div>
+    </div>
+
+    <script>
+        const TOKEN_KEY = "pinger_token";
+        const $ = (id) => document.getElementById(id);
+
+        const getToken = () => localStorage.getItem(TOKEN_KEY);
+        const setToken = (t) => localStorage.setItem(TOKEN_KEY, t);
+        const clearToken = () => localStorage.removeItem(TOKEN_KEY);
+
+        const authHeaders = () => ({
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + getToken(),
+        });
+
+        const showMsg = (el, text, type) => {
+            el.textContent = text;
+            el.className = "msg" + (type ? " " + type : "");
+        };
+
+        async function api(path, options = {}) {
+            const res = await fetch(path, options);
+            if (res.status === 401) {
+                clearToken();
+                showApp(false);
+                throw new Error("Session expired. Please sign in again.");
+            }
+            return res;
+        }
+
+        function showApp(loggedIn) {
+            $("login-card").classList.toggle("hidden", loggedIn);
+            $("app").classList.toggle("hidden", !loggedIn);
+            if (loggedIn) loadUrls();
+        }
+
+        async function login() {
+            const password = $("password").value;
+            showMsg($("login-msg"), "", "");
+            $("login-btn").disabled = true;
+            try {
+                const res = await fetch("/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ password }),
+                });
+                if (!res.ok) {
+                    const data = await res.json().catch(() => ({}));
+                    throw new Error(data.error || "Login failed");
+                }
+                const data = await res.json();
+                setToken(data.token);
+                $("password").value = "";
+                showApp(true);
+            } catch (err) {
+                showMsg($("login-msg"), err.message, "error");
+            } finally {
+                $("login-btn").disabled = false;
+            }
+        }
+
+        function logout() {
+            clearToken();
+            showApp(false);
+        }
+
+        let currentUrls = [];
+
+        function renderUrls(pingResults) {
+            const list = $("url-list");
+            list.innerHTML = "";
+            if (!currentUrls.length) {
+                $("empty-state").classList.remove("hidden");
+                return;
+            }
+            $("empty-state").classList.add("hidden");
+            for (const item of currentUrls) {
+                const enabled = item.enabled !== false;
+                const li = document.createElement("li");
+                li.className = "url-item" + (enabled ? "" : " disabled");
+
+                const status = document.createElement("span");
+                status.className = "status";
+                let metaText = "Added " + new Date(item.createdAt).toLocaleString();
+                if (!enabled) {
+                    metaText = "Paused · not being pinged";
+                } else if (pingResults) {
+                    const r = pingResults.find((p) => p.url === item.url);
+                    if (r) {
+                        status.classList.add(r.ok ? "ok" : "fail");
+                        metaText = r.ok ? "OK · " + r.status : "Failed · " + (r.error || "error");
+                    }
+                }
+
+                const wrap = document.createElement("div");
+                wrap.style.flex = "1";
+                const url = document.createElement("div");
+                url.className = "url";
+                url.textContent = item.url;
+                const meta = document.createElement("div");
+                meta.className = "meta";
+                meta.textContent = metaText;
+                wrap.appendChild(url);
+                wrap.appendChild(meta);
+
+                const toggle = document.createElement("button");
+                toggle.className = "btn-ghost btn-toggle";
+                toggle.textContent = enabled ? "Disable" : "Enable";
+                toggle.onclick = () => toggleUrl(item._id, !enabled);
+
+                const del = document.createElement("button");
+                del.className = "btn-danger";
+                del.textContent = "Remove";
+                del.onclick = () => removeUrl(item._id);
+
+                li.appendChild(status);
+                li.appendChild(wrap);
+                li.appendChild(toggle);
+                li.appendChild(del);
+                list.appendChild(li);
+            }
+        }
+
+        async function loadUrls() {
+            try {
+                const res = await api("/list-urls", { headers: authHeaders() });
+                currentUrls = await res.json();
+                renderUrls(null);
+            } catch (err) {
+                showMsg($("app-msg"), err.message, "error");
+            }
+        }
+
+        async function addUrl() {
+            const input = $("new-url");
+            const url = input.value.trim();
+            if (!url) return;
+            $("add-btn").disabled = true;
+            showMsg($("app-msg"), "", "");
+            try {
+                const res = await api("/add-url", {
+                    method: "POST",
+                    headers: authHeaders(),
+                    body: JSON.stringify({ url }),
+                });
+                if (!res.ok) throw new Error(await res.text());
+                input.value = "";
+                showMsg($("app-msg"), "URL added.", "success");
+                await loadUrls();
+            } catch (err) {
+                showMsg($("app-msg"), err.message, "error");
+            } finally {
+                $("add-btn").disabled = false;
+            }
+        }
+
+        async function toggleUrl(id, enabled) {
+            try {
+                const res = await api("/toggle-url/" + id, {
+                    method: "PATCH",
+                    headers: authHeaders(),
+                    body: JSON.stringify({ enabled }),
+                });
+                if (!res.ok) throw new Error(await res.text());
+                showMsg($("app-msg"), enabled ? "URL enabled." : "URL disabled.", "success");
+                await loadUrls();
+            } catch (err) {
+                showMsg($("app-msg"), err.message, "error");
+            }
+        }
+
+        async function removeUrl(id) {
+            if (!confirm("Remove this URL?")) return;
+            try {
+                const res = await api("/remove-url/" + id, {
+                    method: "DELETE",
+                    headers: authHeaders(),
+                });
+                if (!res.ok) throw new Error(await res.text());
+                showMsg($("app-msg"), "URL removed.", "success");
+                await loadUrls();
+            } catch (err) {
+                showMsg($("app-msg"), err.message, "error");
+            }
+        }
+
+        async function pingNow() {
+            $("ping-btn").disabled = true;
+            showMsg($("app-msg"), "Pinging all URLs...", "");
+            try {
+                const res = await api("/ping-now", {
+                    method: "POST",
+                    headers: authHeaders(),
+                });
+                if (!res.ok) throw new Error(await res.text());
+                const results = await res.json();
+                renderUrls(results);
+                const okCount = results.filter((r) => r.ok).length;
+                showMsg($("app-msg"), okCount + "/" + results.length + " responded OK.", "success");
+            } catch (err) {
+                showMsg($("app-msg"), err.message, "error");
+            } finally {
+                $("ping-btn").disabled = false;
+            }
+        }
+
+        $("login-btn").onclick = login;
+        $("password").addEventListener("keydown", (e) => { if (e.key === "Enter") login(); });
+        $("logout-btn").onclick = logout;
+        $("add-btn").onclick = addUrl;
+        $("new-url").addEventListener("keydown", (e) => { if (e.key === "Enter") addUrl(); });
+        $("refresh-btn").onclick = loadUrls;
+        $("ping-btn").onclick = pingNow;
+
+        showApp(!!getToken());
+    </script>
+</body>
+</html>

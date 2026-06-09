@@ -42,14 +42,23 @@ const pingAllUrls = async () => {
     const collection = db.collection("urls");
     const urls = await collection.find({ enabled: { $ne: false } }).toArray();
     const results = [];
-    for (const { url } of urls) {
+    for (const { _id, url } of urls) {
+        const pingedAt = new Date();
         try {
             const response = await axios.get(url);
             console.log(`Pinged ${url} - Status: ${response.status}`);
             results.push({ url, status: response.status, ok: true });
+            await collection.updateOne(
+                { _id },
+                { $set: { lastOk: true, lastStatus: response.status, lastError: null, lastPingedAt: pingedAt } }
+            );
         } catch (error) {
             console.error(`Failed to ping ${url}:`, error.message);
             results.push({ url, status: null, ok: false, error: error.message });
+            await collection.updateOne(
+                { _id },
+                { $set: { lastOk: false, lastStatus: null, lastError: error.message, lastPingedAt: pingedAt } }
+            );
         }
     }
     return results;

@@ -4,33 +4,49 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Auto Pinger</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <style>
         :root {
-            --bg: #0f1117;
-            --card: #181b24;
-            --card-2: #1f2330;
-            --border: #2a2f3d;
-            --text: #e6e8ee;
-            --muted: #8b90a0;
-            --accent: #5b8cff;
-            --accent-hover: #4178f0;
-            --danger: #ff5b6e;
-            --danger-hover: #e8475a;
-            --ok: #34d399;
-            --radius: 14px;
+            --bg: #0a0c12;
+            --bg-2: #11141d;
+            --card: rgba(23, 27, 38, 0.72);
+            --card-solid: #171b26;
+            --card-2: #1d2230;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-strong: rgba(255, 255, 255, 0.14);
+            --text: #eceef4;
+            --muted: #9499ab;
+            --faint: #6b7185;
+            --accent: #6d8bff;
+            --accent-2: #9b6bff;
+            --accent-hover: #5a7bff;
+            --danger: #ff5d72;
+            --ok: #36d399;
+            --warn: #f7b955;
+            --radius: 16px;
+            --radius-sm: 10px;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
+        html, body { height: 100%; }
+
         body {
-            font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
-            background: radial-gradient(1200px 600px at 50% -10%, #1a1f2e 0%, var(--bg) 55%);
+            font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
             color: var(--text);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 32px 16px;
+            padding: 40px 18px 60px;
+            background:
+                radial-gradient(900px 500px at 85% -5%, rgba(155, 107, 255, 0.16), transparent 60%),
+                radial-gradient(900px 500px at 10% 0%, rgba(109, 139, 255, 0.18), transparent 55%),
+                linear-gradient(180deg, var(--bg-2) 0%, var(--bg) 100%);
+            background-attachment: fixed;
+            -webkit-font-smoothing: antialiased;
         }
 
         .hidden { display: none !important; }
@@ -38,161 +54,304 @@
         .logo {
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 24px;
+            gap: 12px;
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 28px;
         }
-        .logo .dot {
-            width: 12px; height: 12px; border-radius: 50%;
-            background: var(--ok);
-            box-shadow: 0 0 12px var(--ok);
-            animation: pulse 1.8s infinite;
+        .logo .badge {
+            width: 38px; height: 38px;
+            border-radius: 11px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            box-shadow: 0 8px 24px rgba(109, 139, 255, 0.4);
         }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: .5; transform: scale(.8); }
-        }
+        .logo .badge svg { width: 20px; height: 20px; }
+        .logo .wave { color: var(--muted); font-weight: 500; font-size: 13px; display: block; }
 
         .card {
+            position: relative;
             background: var(--card);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            padding: 24px;
+            padding: 28px;
             width: 100%;
-            box-shadow: 0 20px 50px rgba(0,0,0,.35);
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45);
         }
 
-        #login-card { max-width: 380px; }
-        #app { max-width: 720px; width: 100%; }
+        #login-card { max-width: 400px; animation: rise .4s ease; }
+        #app { max-width: 760px; width: 100%; animation: rise .4s ease; }
 
-        h2 { font-size: 18px; margin-bottom: 4px; }
-        .sub { color: var(--muted); font-size: 13px; margin-bottom: 18px; }
+        @keyframes rise {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-        label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+        h2 { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; }
+        .sub { color: var(--muted); font-size: 13.5px; margin: 6px 0 22px; }
+
+        label { display: block; font-size: 12.5px; font-weight: 500; color: var(--muted); margin-bottom: 8px; }
+
+        .field { position: relative; }
+        .field svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 17px; height: 17px; color: var(--faint); }
+        .field input { padding-left: 42px !important; }
 
         input[type="password"], input[type="text"], input[type="url"] {
             width: 100%;
-            background: var(--card-2);
-            border: 1px solid var(--border);
+            background: rgba(10, 12, 18, 0.6);
+            border: 1px solid var(--border-strong);
             color: var(--text);
-            padding: 12px 14px;
-            border-radius: 10px;
+            padding: 13px 15px;
+            border-radius: var(--radius-sm);
             font-size: 14px;
+            font-family: inherit;
             outline: none;
-            transition: border-color .15s;
+            transition: border-color .15s, box-shadow .15s, background .15s;
         }
-        input:focus { border-color: var(--accent); }
+        input::placeholder { color: var(--faint); }
+        input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(109, 139, 255, 0.18);
+            background: rgba(10, 12, 18, 0.85);
+        }
 
         button {
             cursor: pointer;
             border: none;
-            border-radius: 10px;
-            font-size: 14px;
+            border-radius: var(--radius-sm);
+            font-size: 13.5px;
             font-weight: 600;
+            font-family: inherit;
             padding: 12px 16px;
-            transition: background .15s, opacity .15s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background .15s, transform .08s, opacity .15s, border-color .15s;
         }
-        button:disabled { opacity: .6; cursor: not-allowed; }
+        button:active:not(:disabled) { transform: translateY(1px); }
+        button:disabled { opacity: .55; cursor: not-allowed; }
+        button svg { width: 16px; height: 16px; }
 
-        .btn-primary { background: var(--accent); color: white; width: 100%; margin-top: 14px; }
-        .btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            box-shadow: 0 8px 22px rgba(109, 139, 255, 0.3);
+        }
+        .btn-primary:hover:not(:disabled) { filter: brightness(1.08); }
+        .btn-block { width: 100%; margin-top: 18px; }
 
         .btn-ghost {
-            background: var(--card-2);
+            background: rgba(255, 255, 255, 0.04);
             color: var(--text);
-            border: 1px solid var(--border);
+            border: 1px solid var(--border-strong);
         }
-        .btn-ghost:hover:not(:disabled) { background: #262b3a; }
+        .btn-ghost:hover:not(:disabled) { background: rgba(255, 255, 255, 0.09); }
 
-        .btn-danger { background: transparent; color: var(--danger); border: 1px solid transparent; padding: 8px 10px; }
-        .btn-danger:hover:not(:disabled) { background: rgba(255,91,110,.12); }
+        .btn-icon {
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid transparent;
+            padding: 9px;
+            border-radius: 9px;
+        }
+        .btn-icon:hover:not(:disabled) { background: rgba(255, 255, 255, 0.07); color: var(--text); }
+        .btn-icon.danger:hover:not(:disabled) { background: rgba(255, 93, 114, 0.14); color: var(--danger); }
 
         .topbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 18px;
+            gap: 16px;
+            margin-bottom: 22px;
         }
-        .topbar h2 { font-size: 20px; }
+        .topbar h2 { font-size: 21px; }
 
-        .add-row { display: flex; gap: 10px; margin-bottom: 8px; }
-        .add-row input { flex: 1; }
+        .stats { display: flex; gap: 10px; margin-bottom: 22px; flex-wrap: wrap; }
+        .stat {
+            flex: 1;
+            min-width: 120px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 16px;
+        }
+        .stat .num { font-size: 24px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; }
+        .stat .lbl { font-size: 11.5px; color: var(--muted); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.06em; }
+        .stat.active .num { color: var(--ok); }
+        .stat.paused .num { color: var(--warn); }
+
+        .add-row { display: flex; gap: 10px; }
+        .add-row .field { flex: 1; }
         .add-row button { white-space: nowrap; }
 
-        .toolbar { display: flex; gap: 10px; margin: 16px 0; }
+        .toolbar { display: flex; gap: 10px; margin: 20px 0 16px; align-items: center; }
+        .toolbar .spacer { flex: 1; }
 
-        ul { list-style: none; }
+        ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
         .url-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            background: var(--card-2);
+            gap: 14px;
+            background: rgba(255, 255, 255, 0.025);
             border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 12px 14px;
-            margin-bottom: 10px;
+            border-radius: 13px;
+            padding: 14px 16px;
+            transition: border-color .15s, background .15s, transform .15s;
+            animation: rise .3s ease;
         }
-        .url-item .status {
-            width: 10px; height: 10px; border-radius: 50%;
-            background: var(--muted);
+        .url-item:hover { border-color: var(--border-strong); background: rgba(255, 255, 255, 0.045); }
+
+        .dot {
+            width: 9px; height: 9px; border-radius: 50%;
+            background: var(--faint);
             flex-shrink: 0;
+            position: relative;
         }
-        .url-item .status.ok { background: var(--ok); box-shadow: 0 0 8px var(--ok); }
-        .url-item .status.fail { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
-        .url-item .url {
-            flex: 1;
-            font-size: 14px;
-            word-break: break-all;
+        .dot.ok { background: var(--ok); box-shadow: 0 0 0 4px rgba(54, 211, 153, 0.16); }
+        .dot.fail { background: var(--danger); box-shadow: 0 0 0 4px rgba(255, 93, 114, 0.16); }
+        .dot.paused { background: var(--warn); box-shadow: 0 0 0 4px rgba(247, 185, 85, 0.14); }
+
+        .url-main { flex: 1; min-width: 0; }
+        .url-main .url { font-size: 14px; font-weight: 500; word-break: break-all; }
+        .url-main .meta { font-size: 12px; color: var(--muted); margin-top: 3px; display: flex; align-items: center; gap: 6px; }
+
+        .pill { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 99px; }
+        .pill.ok { background: rgba(54, 211, 153, 0.14); color: var(--ok); }
+        .pill.fail { background: rgba(255, 93, 114, 0.14); color: var(--danger); }
+        .pill.paused { background: rgba(247, 185, 85, 0.14); color: var(--warn); }
+
+        .url-item.disabled { opacity: .62; }
+        .url-item.disabled .url { text-decoration: line-through; text-decoration-color: var(--faint); }
+
+        .switch {
+            position: relative;
+            width: 42px; height: 24px;
+            border-radius: 99px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid var(--border-strong);
+            padding: 0;
+            flex-shrink: 0;
+            transition: background .2s;
         }
-        .url-item .meta { font-size: 12px; color: var(--muted); }
-        .url-item.disabled { opacity: .55; }
-        .url-item.disabled .url { text-decoration: line-through; }
-        .btn-toggle { padding: 8px 12px; }
+        .switch .knob {
+            position: absolute;
+            top: 50%; left: 3px;
+            transform: translateY(-50%);
+            width: 17px; height: 17px;
+            border-radius: 50%;
+            background: #fff;
+            transition: left .2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,.35);
+        }
+        .switch.on { background: linear-gradient(135deg, var(--accent), var(--accent-2)); border-color: transparent; }
+        .switch.on .knob { left: 22px; }
 
-        .empty { color: var(--muted); text-align: center; padding: 28px 0; font-size: 14px; }
+        .actions { display: flex; align-items: center; gap: 4px; }
 
-        .msg { font-size: 13px; margin-top: 12px; min-height: 18px; }
+        .empty {
+            text-align: center;
+            padding: 44px 20px;
+            color: var(--muted);
+        }
+        .empty svg { width: 38px; height: 38px; color: var(--faint); margin-bottom: 12px; }
+        .empty .title { font-size: 15px; font-weight: 600; color: var(--text); }
+        .empty .desc { font-size: 13px; margin-top: 4px; }
+
+        .msg { font-size: 13px; margin-top: 14px; min-height: 18px; display: flex; align-items: center; gap: 7px; }
+        .msg:empty { display: none; }
         .msg.error { color: var(--danger); }
         .msg.success { color: var(--ok); }
 
-        .footer { color: var(--muted); font-size: 12px; margin-top: 22px; }
+        .footer {
+            display: flex; align-items: center; justify-content: center; gap: 7px;
+            color: var(--faint); font-size: 12px; margin-top: 24px;
+        }
+        .footer .live { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); animation: blink 1.8s infinite; }
+        @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
         a { color: var(--accent); }
+
+        @media (max-width: 560px) {
+            .card { padding: 20px; }
+            .add-row { flex-direction: column; }
+            .add-row button { width: 100%; }
+            .stat { min-width: 0; }
+        }
     </style>
 </head>
 <body>
-    <div class="logo"><span class="dot"></span> Auto Pinger</div>
+    <div class="logo">
+        <span class="badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </span>
+        <span>Auto Pinger<small class="wave">Keep your services awake</small></span>
+    </div>
 
     <div id="login-card" class="card">
-        <h2>Sign in</h2>
-        <p class="sub">Enter your password to manage pinged URLs.</p>
+        <h2>Welcome back</h2>
+        <p class="sub">Enter your password to manage your pinged services.</p>
         <label for="password">Password</label>
-        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" />
-        <button class="btn-primary" id="login-btn">Sign in</button>
+        <div class="field">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" />
+        </div>
+        <button class="btn-primary btn-block" id="login-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            Sign in
+        </button>
         <div class="msg error" id="login-msg"></div>
     </div>
 
     <div id="app" class="card hidden">
         <div class="topbar">
             <h2>Pinged URLs</h2>
-            <button class="btn-ghost" id="logout-btn">Log out</button>
+            <button class="btn-ghost" id="logout-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                Log out
+            </button>
+        </div>
+
+        <div class="stats">
+            <div class="stat"><div class="num" id="stat-total">0</div><div class="lbl">Total</div></div>
+            <div class="stat active"><div class="num" id="stat-active">0</div><div class="lbl">Active</div></div>
+            <div class="stat paused"><div class="num" id="stat-paused">0</div><div class="lbl">Paused</div></div>
         </div>
 
         <div class="add-row">
-            <input type="url" id="new-url" placeholder="https://your-backend.onrender.com" />
-            <button class="btn-primary" id="add-btn" style="width:auto;margin:0;">Add URL</button>
+            <div class="field">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                <input type="url" id="new-url" placeholder="https://your-backend.onrender.com" />
+            </div>
+            <button class="btn-primary" id="add-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add URL
+            </button>
         </div>
         <div class="msg" id="app-msg"></div>
 
         <div class="toolbar">
-            <button class="btn-ghost" id="refresh-btn">Refresh</button>
-            <button class="btn-ghost" id="ping-btn">Ping all now</button>
+            <button class="btn-ghost" id="ping-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                Ping all now
+            </button>
+            <div class="spacer"></div>
+            <button class="btn-icon" id="refresh-btn" title="Refresh">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            </button>
         </div>
 
         <ul id="url-list"></ul>
-        <div class="empty hidden" id="empty-state">No URLs yet. Add one above to keep it awake.</div>
+        <div class="empty hidden" id="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+            <div class="title">No URLs yet</div>
+            <div class="desc">Add your first service above to keep it awake.</div>
+        </div>
 
-        <div class="footer">Cron pings every minute automatically.</div>
+        <div class="footer"><span class="live"></span> Cron pings every minute automatically</div>
     </div>
 
     <script>
@@ -261,9 +420,18 @@
 
         let currentUrls = [];
 
+        function updateStats() {
+            const total = currentUrls.length;
+            const active = currentUrls.filter((u) => u.enabled !== false).length;
+            $("stat-total").textContent = total;
+            $("stat-active").textContent = active;
+            $("stat-paused").textContent = total - active;
+        }
+
         function renderUrls(pingResults) {
             const list = $("url-list");
             list.innerHTML = "";
+            updateStats();
             if (!currentUrls.length) {
                 $("empty-state").classList.remove("hidden");
                 return;
@@ -274,44 +442,65 @@
                 const li = document.createElement("li");
                 li.className = "url-item" + (enabled ? "" : " disabled");
 
-                const status = document.createElement("span");
-                status.className = "status";
-                let metaText = "Added " + new Date(item.createdAt).toLocaleString();
-                if (!enabled) {
-                    metaText = "Paused · not being pinged";
-                } else if (pingResults) {
-                    const r = pingResults.find((p) => p.url === item.url);
-                    if (r) {
-                        status.classList.add(r.ok ? "ok" : "fail");
-                        metaText = r.ok ? "OK · " + r.status : "Failed · " + (r.error || "error");
-                    }
-                }
+                const dot = document.createElement("span");
+                dot.className = "dot";
 
-                const wrap = document.createElement("div");
-                wrap.style.flex = "1";
+                const main = document.createElement("div");
+                main.className = "url-main";
                 const url = document.createElement("div");
                 url.className = "url";
                 url.textContent = item.url;
                 const meta = document.createElement("div");
                 meta.className = "meta";
-                meta.textContent = metaText;
-                wrap.appendChild(url);
-                wrap.appendChild(meta);
+
+                if (!enabled) {
+                    dot.classList.add("paused");
+                    meta.innerHTML = '<span class="pill paused">Paused</span> Not being pinged';
+                } else {
+                    let result = null;
+                    if (pingResults) result = pingResults.find((p) => p.url === item.url);
+                    if (result) {
+                        dot.classList.add(result.ok ? "ok" : "fail");
+                        meta.innerHTML = result.ok
+                            ? '<span class="pill ok">' + result.status + '</span> Responded OK'
+                            : '<span class="pill fail">Failed</span> ' + (result.error || "error");
+                    } else if (typeof item.lastOk === "boolean") {
+                        dot.classList.add(item.lastOk ? "ok" : "fail");
+                        const when = item.lastPingedAt ? new Date(item.lastPingedAt).toLocaleString() : "";
+                        meta.innerHTML = item.lastOk
+                            ? '<span class="pill ok">' + item.lastStatus + '</span> Last OK ' + when
+                            : '<span class="pill fail">Failed</span> ' + (item.lastError || "error") + (when ? ' \u00b7 ' + when : '');
+                    } else {
+                        meta.textContent = "Added " + new Date(item.createdAt).toLocaleString();
+                    }
+                }
+
+                main.appendChild(url);
+                main.appendChild(meta);
+
+                const actions = document.createElement("div");
+                actions.className = "actions";
 
                 const toggle = document.createElement("button");
-                toggle.className = "btn-ghost btn-toggle";
-                toggle.textContent = enabled ? "Disable" : "Enable";
+                toggle.className = "switch" + (enabled ? " on" : "");
+                toggle.title = enabled ? "Disable" : "Enable";
+                const knob = document.createElement("span");
+                knob.className = "knob";
+                toggle.appendChild(knob);
                 toggle.onclick = () => toggleUrl(item._id, !enabled);
 
                 const del = document.createElement("button");
-                del.className = "btn-danger";
-                del.textContent = "Remove";
+                del.className = "btn-icon danger";
+                del.title = "Remove";
+                del.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
                 del.onclick = () => removeUrl(item._id);
 
-                li.appendChild(status);
-                li.appendChild(wrap);
-                li.appendChild(toggle);
-                li.appendChild(del);
+                actions.appendChild(toggle);
+                actions.appendChild(del);
+
+                li.appendChild(dot);
+                li.appendChild(main);
+                li.appendChild(actions);
                 list.appendChild(li);
             }
         }

@@ -39,6 +39,10 @@ const requireAuth = (req, res, next) => {
 };
 
 const pingAllUrls = async () => {
+    if (!db) {
+        console.warn("Skipping ping run: database not connected.");
+        return [];
+    }
     const collection = db.collection("urls");
     const urls = await collection.find({ enabled: { $ne: false } }).toArray();
     const results = [];
@@ -75,18 +79,37 @@ app.post("/login", (req, res) => {
 
 // Connect to MongoDB
 let db;
-MongoClient.connect(mongoUri)
-    .then((client) => {
+
+const requireDb = (req, res, next) => {
+    if (!db) {
+        return res.status(503).json({ error: "Database unavailable. Please try again shortly." });
+    }
+    next();
+};
+
+const connectToMongo = async (retryDelayMs = 5000) => {
+    try {
+        const client = await MongoClient.connect(mongoUri);
         console.log("Connected to MongoDB");
         db = client.db("website-auto-pinger");
-    })
-    .catch((err) => {
-        console.error("Failed to connect to MongoDB:", err);
-        process.exit(1);
-    });
+
+        client.on("close", () => {
+            console.error("MongoDB connection closed. Will attempt to reconnect.");
+            db = null;
+            setTimeout(() => connectToMongo(retryDelayMs), retryDelayMs);
+        });
+    } catch (err) {
+        console.error("Failed to connect to MongoDB:", err.message);
+        console.error(`Retrying in ${retryDelayMs / 1000}s...`);
+        db = null;
+        setTimeout(() => connectToMongo(retryDelayMs), retryDelayMs);
+    }
+};
+
+connectToMongo();
 
 // Route to add URLs to the database
-app.post("/add-url", requireAuth, async (req, res) => {
+app.post("/add-url", requireAuth, requireDb, async (req, res) => {
     const { url } = req.body;
     if (!url) {
         return res.status(400).send("URL is required");
@@ -103,7 +126,7 @@ app.post("/add-url", requireAuth, async (req, res) => {
 });
 
 // Route to list all URLs
-app.get("/list-urls", requireAuth, async (req, res) => {
+app.get("/list-urls", requireAuth, requireDb, async (req, res) => {
     try {
         const collection = db.collection("urls");
         const urls = await collection.find().toArray();
@@ -115,7 +138,7 @@ app.get("/list-urls", requireAuth, async (req, res) => {
 });
 
 // Route to remove a URL by ID
-app.delete("/remove-url/:id", requireAuth, async (req, res) => {
+app.delete("/remove-url/:id", requireAuth, requireDb, async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -133,7 +156,7 @@ app.delete("/remove-url/:id", requireAuth, async (req, res) => {
     }
 });
 
-app.patch("/toggle-url/:id", requireAuth, async (req, res) => {
+app.patch("/toggle-url/:id", requireAuth, requireDb, async (req, res) => {
     const { id } = req.params;
     const { enabled } = req.body;
 
@@ -159,7 +182,7 @@ app.patch("/toggle-url/:id", requireAuth, async (req, res) => {
     }
 });
 
-app.post("/ping-now", requireAuth, async (req, res) => {
+app.post("/ping-now", requireAuth, requireDb, async (req, res) => {
     try {
         const results = await pingAllUrls();
         res.status(200).json(results);
